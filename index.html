@@ -189,7 +189,7 @@
     vDepth = z2;
     vGlow = clamp(0.25 + 0.55*abs(w) + 0.9*extra, 0.0, 1.6);
 
-    gl_Position = vec4(ndcX, ndcY, ndcZ, 1.0);
+    gl_Position = vec4(-ndcX, ndcY, ndcZ, 0.5);
 
     // Distance-based size falloff with better scaling
     float distScale = clamp(800.0 / (50.0 + z2), 0.3, 2.5);
@@ -369,6 +369,7 @@
           lastX = 0,
           lastY = 0,
           pitch = 0.15; // Match initial pitch
+        const zPush = -50.0; // Match uZPush value
         function screenToWorldTile(clientX, clientY) {
           const rect = canvas.getBoundingClientRect();
           const nx = ((clientX - rect.left) / rect.width) * 2 - 1; // -1..1
@@ -377,7 +378,9 @@
           const aspect = rect.width / rect.height;
           const fov = 1.2;
           const f = 1 / Math.tan(fov * 0.5);
-          // camera ray in camera space
+          const camH = 80 * DPR; // Match camera height
+
+          // camera ray in camera space (before rotation)
           let dir = { x: (nx * aspect) / f, y: -ny / f, z: 1 };
           // rotate around X by current pitch
           const s = Math.sin(pitch),
@@ -385,8 +388,10 @@
           const y2 = c * dir.y - s * dir.z;
           const z2 = s * dir.y + c * dir.z;
           dir = { x: dir.x, y: y2, z: z2 };
-          const camH = 80 * DPR; // Match camera height
-          const origin = { x: 0, y: camH, z: 0 };
+
+          // Account for zPush: the origin in world space needs to be adjusted
+          // because the scene is pushed in view space
+          const origin = { x: 0, y: camH, z: -zPush };
 
           // Only calculate intersection if ray is pointing down
           if (dir.y >= 0) return [0.5, 0.5]; // default center if not hitting plane
