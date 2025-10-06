@@ -269,7 +269,9 @@
         assert(loc.aPos >= 0, "attrib aPos present");
 
         // ----- Grid (tile coords 0..1) -----
-        let spacing = 18; // pixels between particles (wheel adjusts)
+        // Adjust default spacing based on screen width for better mobile experience
+        const isMobile = window.innerWidth < 768;
+        let spacing = isMobile ? 18 : 30; // pixels between particles (wheel adjusts)
         let positions = new Float32Array(0);
         let count = 0;
         const buffer = gl.createBuffer();
@@ -277,10 +279,15 @@
         const tileD = 1200; // depth of tile
 
         function rebuild() {
+          // Calculate base grid size from spacing
           const w = Math.max(1, Math.floor(canvas.width / spacing));
           const h = Math.max(1, Math.floor(canvas.height / (spacing * 0.7))); // a bit denser in depth
-          const cols = w + 6;
+
+          // Ensure minimum columns on narrow screens to avoid "line" effect
+          const minCols = 25; // minimum columns regardless of screen width
+          const cols = Math.max(minCols, w + 6);
           const rows = h + 8;
+
           count = cols * rows;
           positions = new Float32Array(count * 2);
           let i = 0;
@@ -435,7 +442,7 @@
           (e) => {
             spacing = Math.min(
               60,
-              Math.max(8, spacing + (e.deltaY > 0 ? 2 : -2))
+              Math.max(14, spacing + (e.deltaY > 0 ? 2 : -2))
             );
             rebuild();
           },
