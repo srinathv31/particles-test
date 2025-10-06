@@ -416,7 +416,7 @@
         const zPush = -50.0; // Match uZPush value
         function screenToWorldTile(clientX, clientY) {
           const rect = canvas.getBoundingClientRect();
-          const nx = ((clientX - rect.left) / rect.width) * 2 - 1; // -1..1
+          const nx = -(((clientX - rect.left) / rect.width) * 2 - 1); // -1..1 (negated to match shader flip)
           const ny = ((clientY - rect.top) / rect.height) * 2 - 1; // -1..1
 
           const aspect = rect.width / rect.height;
