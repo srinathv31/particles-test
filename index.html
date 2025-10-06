@@ -166,9 +166,9 @@
     // Mouse hover effect
     float mouseEffect = 0.0; float mouseSizeBoost = 0.0;
     if(uMouseActive > 0.5) {
-      // Mouse position is stored in aPos space, so we compare with aPos before wrapping
-      vec2 particlePos = vec2(tx, tz); // unwrapped position with scroll applied
-      vec2 mousePos = uMouse + uScroll; // apply current scroll to mouse
+      // Compare wrapped tile positions directly (both in 0-1 space)
+      vec2 particlePos = t; // wrapped position after fract()
+      vec2 mousePos = uMouse; // absolute mouse position (already in tile space)
       // Calculate wrapped distance (handles tile boundaries)
       vec2 delta = particlePos - mousePos;
       delta = abs(fract(delta + 0.5) - 0.5);
@@ -492,9 +492,10 @@
         // Mouse hover tracking
         canvas.addEventListener("mousemove", (e) => {
           const [u, v] = screenToWorldTile(e.clientX, e.clientY);
-          // Store mouse position relative to current scroll so it stays fixed as particles flow
-          mouseX = (((u - scrollX) % 1) + 1) % 1;
-          mouseY = (((v - scrollY) % 1) + 1) % 1;
+          // Store absolute mouse position (not relative to scroll)
+          // The shader will handle the scroll comparison
+          mouseX = u;
+          mouseY = v;
           mouseActive = true;
         });
         canvas.addEventListener("mouseenter", () => {
